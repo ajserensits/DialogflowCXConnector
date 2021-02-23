@@ -1,0 +1,88 @@
+Prerequisites
+1] Dialogflow Agent is created and a Service Account tied to the underlying GCP is created with Dialogflow API Admin access
+    - Create a JSON key of this service account
+    - Store this key in a file on the server where you wish to run the connector application
+
+2] Set the Voice Request URL of your CPaaS number to the URL / Port that the application will be listening to on
+  - Voice URL Format: https://DOMAIN:PORT/voice <-- https://cloudy-communications.com:3000/voice
+  - SMS URL Form: https://DOMAIN:PORT/sms <-- https://cloudy-communications.com:3000/sms
+
+3] Decide on whether you want to listen over https or http.
+    - If using HTTP just uncomment out the lines that say 'Begin HTTP' up until it says 'End HTTP'.  Comment out from 'Begin HTTPS' to 'End HTTPS'
+    - If using HTTPS just uncomment out the lines that say 'Begin HTTPS' up until it says 'End HTTPS'.  Comment out from 'Begin HTTP' to 'End HTTP'
+    - If using HTTPS you must provide valid keys / chain files
+
+4] This connector initially kicks off the session with a Welcome Event for voice
+    - Make sure your agent has a 'Welcome' event handler  <-- https://stackoverflow.com/questions/65241848/start-a-conversation-at-the-beginning-of-a-flow-using-flow-id
+
+5] When the Dialogflow Session is initiated, it passes in session parameters:
+
+    For Voice Interactions:
+      {
+          "calling_party" : "+16106571111" , <--- End User Calling in
+          "called_party" : "+16106570000" ,  <--- Avaya Cloud Number
+          "call_sid" : "dsljfhlsdfns" ,      <--- Call SID from Avaya Cloud
+          "interaction_type" : "VOICE"       <--- Interaction type
+      }
+
+    For SMS Interactions:
+      {
+          "calling_party" : "+16106571111" , <--- End User Texting in
+          "called_party" : "+16106570000" ,  <--- Avaya Cloud Number
+          "sms_sid" : "dsljfhlsdfns" ,       <--- SMS SID from Avaya Cloud
+          "interaction_type" : "SMS"         <--- Interaction type
+      }
+
+6] There are parameters that allow you to control the call.  Including these session parameters will induce some sort of behavior depending on the value
+
+    avaya_cloud_transfer : true / false <--- Tells the connector to transfer the call
+
+    avaya_cloud_transfer_to : '+16106572222' <--- number / address to transfer the call to (Requires 'avaya_cloud_transfer' to be true)
+
+    avaya_cloud_transfer_caller_id : '+16106572222' <--- number / address to use as the callerId for the transfer (Requires 'avaya_cloud_transfer' to be true)
+      - Set this value to 'FROM' to use the calling_party's number as the callerId
+      - Set this value to 'TO' to use the called_party's number as the callerId
+      - Set this value to any other number that you'd like to use as the callerId
+
+    avaya_cloud_sip_transfer : true / false <--- Tells the connector to transfer the call via SIP (Requires 'avaya_cloud_transfer' to be true)
+
+    avaya_cloud_sip_username : 'myUsername' <--- When transferring a call via SIP, this username will be passed along with the request
+
+    avaya_cloud_sip_password : 'password' <--- When transferring a call via SIP, this password will be passed along with the request
+
+    avaya_cloud_sip_direct_media : true / false <--- When transferring a call via SIP, this value will determine whether or not Avaya Cloud forks the media off of
+
+    avaya_cloud_end_conversation : true / false <--- When set to true, Avaya Cloud will end the call once the prompt returned from dialogflow is spoken
+
+    avaya_cloud_speech_hints : true / false <--- When set to true, the connector will know to pass in speech hints
+
+    avaya_cloud_custom_speech_hints : 'example, speech hints, separated by, commas' <--- A comma separated list of speech hints (Requires 'avaya_cloud_speech_hints' to be true)
+
+    avaya_cloud_speech_hints_alphanumeric : true / false <--- When set to true, the connector will know to pass in the alphanumeric speech hints (Requires 'avaya_cloud_speech_hints' to be true)
+        - "0,1,2,3,4,5,6,7,8,9,A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z"
+
+    avaya_cloud_speech_hints_digits : true / false <--- When set to true, the connector will know to pass in the digit speech hints  (Requires 'avaya_cloud_speech_hints' to be true)
+        - "0,1,2,3,4,5,6,7,9"
+
+    avaya_cloud_speech_hints_letters : true / false <--- When set to true, the connector will know to pass in the individual letters speech hints  (Requires 'avaya_cloud_speech_hints' to be true)
+        - "A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z"
+
+    avaya_cloud_speech_common_yes_and_no : true / false <--- When set to true, the connector will know to pass in the common yes/no speech hints  (Requires 'avaya_cloud_speech_hints' to be true)
+        - "yes,yeah,yup,why not,okay i will,yes that's alright,yes i do, exactly,of course,yep,that's okay,ok,okay,sure,for sure,sg,yes that's ok,i agree,yes you can do it, i don't mind,that one works,that works,sure why not,perfect,i think so, yep that's right,yes i agree,sounds correct,sounds good,that's correct,go ahead,do it,it's fine,alright,yes please,alright why not,right,looks perfect,yes i can,confirm,absolutely","thanks but no,no way,no,no don't,na,nah,no it isn't,don't,nah i'm good,no i cannot, I can't,nothing,no that's ok, nope, no not really,nope not really,thanks but not this time,I don't think so,thanks but not this time,no maybe next time,not this time,i disagree,no we are good,don't do it,no that be all,not right now, no thanks, no that's ok,I don't want that,definitely not,nothing else,not,not at all,no never,no way no,not really,not today, not interested,no that's fine thank you,i'm not"
+
+    avaya_cloud_dtmf : true / false <--- Tells the connector to listen for DTMF
+
+    avaya_cloud_dtmf_stop_digit : '#' <--- The DTMF tone that will signify to stop collecting DTMF (Requires 'avaya_cloud_dtmf' to be true)
+
+    avaya_cloud_dtmf_num_digits : 5 <--- The number of digits you want to collect (Requires 'avaya_cloud_dtmf' to be true)
+
+    avaya_cloud_dtmf_timeout : 5 <--- The number of seconds you want to wait to trigger the timeout after collecting digits (Requires 'avaya_cloud_dtmf' to be true)
+
+
+7] Requires nodejs
+    - On your server, navigate to a directory and create a new npm project via 'npm init' (bypass this step if you are familiar with nodejs)
+    - Upload the app-Engine-OS.js file to this directory
+    - Open the app-Engine-OS.js file and fill in all of the Dialogflow variables 
+    - Navigate into the directory with npm initialized and run the following command
+        'sudo npm install express http https request-promise @avaya/cpaas body-parser cookie-parser fs @google-cloud/dialogflow-cx uuid pb-util'
+    - Run 'sudo node app-Engine-OS.js' to start the application
