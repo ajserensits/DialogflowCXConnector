@@ -335,14 +335,16 @@ async function detect_intent_cx(queryInputObject , session_id , body , interacti
 
     //console.log("Query Result: " , response.queryResult);
 
+    let msgText = [];
     for (const message of response.queryResult.responseMessages) {
       if (message.text) {
         console.log(`Agent Response: ${message.text.text}`);
+        msgText.push(message.text.text);
       }
     }
 
     const methodResponse = {
-        text : response.queryResult.responseMessages[0].text.text ,
+        text : msgText.join(' ') ,
         parameters : response.queryResult.parameters
     };
 
